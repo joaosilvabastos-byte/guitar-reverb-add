@@ -708,6 +708,7 @@
     let recordedChunks = [];
 
     function processAndExport() {
+<<<<<<< HEAD
     const v = document.getElementById('videoPlayer');
     const a = document.getElementById('audioPlayer');
     const isVideo = (v.src && !v.classList.contains('hidden'));
@@ -824,6 +825,106 @@
         }, 100);
     });
 }
+=======
+        const v = document.getElementById('videoPlayer');
+        const a = document.getElementById('audioPlayer');
+        const isVideo = (v.src && !v.classList.contains('hidden'));
+        const isAudio = (a.src && !a.classList.contains('hidden'));
+        const mediaElement = isVideo ? v : (isAudio ? a : null);
+
+        if (!mediaElement || !mediaElement.src) {
+            alert(i18n[currentLang].noMedia);
+            return;
+        }
+
+        if (!isProUser) {
+            openProModal();
+            return;
+        }
+
+        const exportBtn = document.getElementById('exportBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressStatus = document.getElementById('progressStatus');
+
+        exportBtn.disabled = true;
+        exportBtn.classList.add('opacity-50');
+        progressContainer.classList.remove('hidden');
+
+        // Reset player to start
+        mediaElement.pause();
+        mediaElement.currentTime = 0;
+
+        const streamDest = audioCtx.createMediaStreamDestination();
+        wetGainNode.connect(streamDest);
+        dryGainNode.connect(streamDest);
+
+        let combinedStream;
+        if (isVideo) {
+            const videoStream = v.captureStream();
+            combinedStream = new MediaStream([
+                ...videoStream.getVideoTracks(),
+                ...streamDest.stream.getAudioTracks()
+            ]);
+        } else {
+            combinedStream = streamDest.stream;
+        }
+
+        recordedChunks = [];
+        const mimeType = isVideo ? 'video/mp4' : 'audio/webm';
+        mediaRecorder = new MediaRecorder(combinedStream, { mimeType: mimeType });
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) recordedChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(recordedChunks, { type: isVideo ? 'video/mp4' : 'audio/wav' });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64Data = reader.result;
+                const ext = isVideo ? ".mp4" : ".wav";
+                const outMime = isVideo ? "video/mp4" : "audio/wav";
+                let baseName = originalFileName.replace(/(_reverb|\.reverb)+/g, '').replace(/\.[^/.]+$/, "");
+                let exportName = `${baseName}.reverb${ext}`;
+
+                if (window.AndroidDownloadBridge && window.AndroidDownloadBridge.downloadFile) {
+                    window.AndroidDownloadBridge.downloadFile(base64Data, exportName, outMime);
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const lnk = document.createElement('a'); lnk.href = url; lnk.download = exportName;
+                    document.body.appendChild(lnk); lnk.click(); document.body.removeChild(lnk);
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }
+
+                showSuccessModal(exportName);
+                exportBtn.disabled = false;
+                exportBtn.classList.remove('opacity-50');
+                progressContainer.classList.add('hidden');
+            };
+            reader.readAsDataURL(blob);
+        };
+
+        mediaElement.play().then(() => {
+            mediaRecorder.start();
+            progressStatus.innerText = i18n[currentLang].procText;
+
+            const duration = mediaElement.duration;
+            const updateProgress = setInterval(() => {
+                const progress = (mediaElement.currentTime / duration) * 100;
+                progressBar.style.width = Math.min(progress, 100) + '%';
+                progressPercent.textContent = Math.round(Math.min(progress, 100)) + '%';
+
+                if (mediaElement.ended || mediaElement.currentTime >= duration) {
+                    clearInterval(updateProgress);
+                    mediaRecorder.stop();
+                    mediaElement.pause();
+                }
+            }, 100);
+        });
+    }
+>>>>>>> e8a7ff4800838b2e35568106442bc6457259c601
 
     function showSuccessModal(fileName) {
         const dict = i18n[currentLang];
