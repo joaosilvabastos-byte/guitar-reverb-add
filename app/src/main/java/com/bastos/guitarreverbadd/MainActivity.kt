@@ -38,14 +38,13 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
     // Google Play Billing
     private lateinit var billingClient: BillingClient
     private var productDetailsList: List<ProductDetails> = emptyList()
-    private val PRODUCT_ID_PRO = "pro_version" // ID do produto a criar na Play Console — tem de ser IDÊNTICO, char a char
+    private val PRODUCT_ID_PRO = "pro_subscription"
+    private val BASE_PLAN_ID = "pro-annual"
     private val TAG_BILLING = "GuitarReverbBilling"
     private var billingReconnectAttempts = 0
     private val MAX_BILLING_RECONNECT_ATTEMPTS = 3
 
-    // Guarda notificações do Billing que cheguem ANTES da página acabar de
-    // carregar (o setProStatus/setProPrice ainda não existem nesse momento),
-    // para serem disparadas assim que a página estiver pronta.
+    // Guarda notificações do Billing que cheguem ANTES da página acabar de carregar
     private var webViewPageLoaded = false
     private var pendingProNotify = false
     private var pendingPriceNotify: String? = null
@@ -80,8 +79,6 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 webViewPageLoaded = true
-                // Dispara agora qualquer notificação de Billing que tenha chegado
-                // antes de "setProStatus"/"setProPrice" existirem na página.
                 if (pendingProNotify) {
                     pendingProNotify = false
                     notificarWebViewProAtivo()
@@ -133,15 +130,27 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
                 uploadMessage?.onReceiveValue(null)
                 uploadMessage = filePathCallback
 
-                val intent = fileChooserParams?.createIntent()
-                return try {
-                    if (intent != null) {
-                        startActivityForResult(intent, FILECHOOSER_RESULTCODE)
-                        true
-                    } else {
-                        false
-                    }
+                var intent: Intent? = null
+                try {
+                    intent = fileChooserParams?.createIntent()
                 } catch (e: Exception) {
+                    Log.e(TAG_BILLING, "Erro ao criar intent do FileChooser: ${e.localizedMessage}")
+                }
+
+                if (intent == null) {
+                    intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "*/*"
+                        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("video/*", "audio/*"))
+                    }
+                }
+
+                return try {
+                    startActivityForResult(intent, FILECHOOSER_RESULTCODE)
+                    true
+                } catch (e: Exception) {
+                    Log.e(TAG_BILLING, "Falha ao iniciar atividade de seleção de ficheiro: ${e.localizedMessage}")
+                    uploadMessage?.onReceiveValue(null)
                     uploadMessage = null
                     false
                 }
@@ -227,7 +236,7 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
         val productList = listOf(
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId(PRODUCT_ID_PRO)
-                .setProductType(BillingClient.ProductType.INAPP)
+                .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         )
 
@@ -241,9 +250,14 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
                     productDetailsList = result.productDetailsList
                     val proDetails = productDetailsList.find { it.productId == PRODUCT_ID_PRO }
                     if (proDetails != null) {
-                        val formattedPrice = proDetails.oneTimePurchaseOfferDetails?.formattedPrice
+                        val offer = proDetails.subscriptionOfferDetails?.find { it.basePlanId == BASE_PLAN_ID }
+                            ?: proDetails.subscriptionOfferDetails?.firstOrNull()
+
+                        val formattedPrice = offer?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
                         if (formattedPrice != null) {
                             notificarWebViewPreco(formattedPrice)
+                        } else {
+                            Log.w(TAG_BILLING, "Preço não encontrado para a oferta do produto '$PRODUCT_ID_PRO'.")
                         }
                     } else {
                         Log.w(TAG_BILLING, "Produto '$PRODUCT_ID_PRO' não encontrado na Play Console.")
@@ -258,9 +272,18 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
     private fun iniciarFluxoCompra() {
         val productDetails = productDetailsList.find { it.productId == PRODUCT_ID_PRO }
         if (productDetails != null) {
+            val offer = productDetails.subscriptionOfferDetails?.find { it.basePlanId == BASE_PLAN_ID }
+                ?: productDetails.subscriptionOfferDetails?.firstOrNull()
+
+            if (offer == null) {
+                Toast.makeText(this, "Oferta de subscrição indisponível.", Toast.LENGTH_SHORT).show()
+                return
+            }
+
             val productDetailsParamsList = listOf(
                 BillingFlowParams.ProductDetailsParams.newBuilder()
                     .setProductDetails(productDetails)
+                    .setOfferToken(offer.offerToken)
                     .build()
             )
 
@@ -307,35 +330,46 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
 
     private fun processarCompra(purchase: Purchase) {
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-            if (!purchase.isAcknowledged) {
-                val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
-                    .setPurchaseToken(purchase.purchaseToken)
-                    .build()
+            val isProProduct = purchase.products.contains(PRODUCT_ID_PRO)
+            if (isProProduct) {
+                if (!purchase.isAcknowledged) {
+                    val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
+                        .setPurchaseToken(purchase.purchaseToken)
+                        .build()
 
-                billingClient.acknowledgePurchase(acknowledgePurchaseParams) { result ->
-                    if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                        notificarWebViewProAtivo()
+                    billingClient.acknowledgePurchase(acknowledgePurchaseParams) { result ->
+                        if (result.responseCode == BillingClient.BillingResponseCode.OK) {
+                            notificarWebViewProAtivo()
+                        } else {
+                            Log.e(TAG_BILLING, "Erro ao reconhecer subscrição: ${result.responseCode}")
+                        }
                     }
+                } else {
+                    notificarWebViewProAtivo()
                 }
-            } else {
-                notificarWebViewProAtivo()
             }
         }
     }
 
     private fun verificarComprasExistentes() {
         val params = QueryPurchasesParams.newBuilder()
-            .setProductType(BillingClient.ProductType.INAPP)
+            .setProductType(BillingClient.ProductType.SUBS)
             .build()
 
         billingClient.queryPurchasesAsync(params, object : PurchasesResponseListener {
             override fun onQueryPurchasesResponse(billingResult: BillingResult, purchases: List<Purchase>) {
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    var foundActivePro = false
                     purchases.forEach { purchase ->
-                        if (purchase.products.contains(PRODUCT_ID_PRO) &&
-                            purchase.purchaseState == Purchase.PurchaseState.PURCHASED
-                        ) {
+                        val isProProduct = purchase.products.contains(PRODUCT_ID_PRO)
+                        if (isProProduct && purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                            foundActivePro = true
                             processarCompra(purchase)
+                        }
+                    }
+                    if (!foundActivePro) {
+                        runOnUiThread {
+                            webView.evaluateJavascript("javascript:if(typeof setProStatus === 'function') { setProStatus(false); }", null)
                         }
                     }
                 } else {
@@ -359,8 +393,12 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == FILECHOOSER_RESULTCODE) {
-            if (uploadMessage == null) return
-            uploadMessage?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data))
+            val results = if (resultCode == RESULT_OK) {
+                WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+            } else {
+                null
+            }
+            uploadMessage?.onReceiveValue(results)
             uploadMessage = null
         }
     }
@@ -382,10 +420,10 @@ class MainActivity : AppCompatActivity(), PurchasesUpdatedListener {
                 }
                 val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
                 if (uri != null) {
-                    contentResolver.openOutputStream(uri).use { os ->
-                        os?.write(decodedBytes)
+                    contentResolver.openOutputStream(uri)?.use { os ->
+                        os.write(decodedBytes)
                     }
-                    Toast.makeText(this, "Ficheiro guardado em Downloads: $fileName", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Ficheiro guardado emDownloads: $fileName", Toast.LENGTH_LONG).show()
                 }
             } else {
                 val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)

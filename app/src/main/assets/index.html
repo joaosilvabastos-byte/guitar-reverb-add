@@ -247,11 +247,10 @@
         </div>
         <h2 class="text-2xl font-bold text-white mb-2" data-i18n="proUpgradeTitle">Versão PRO Requerida</h2>
         <p class="text-slate-400 text-sm mb-6" data-i18n="proUpgradeText">A exportação de ficheiros é um recurso exclusivo da versão PRO.</p>
-
         <!-- Opção 1: Compra Oficial -->
         <button type="button" onclick="buyProOnPlayStore()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition shadow-lg mb-6 flex items-center justify-center gap-2">
             <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-            <span>Obter Versão PRO — <span id="pro-price-label">10€</span></span>
+            <span>Obter Versão PRO — <span id="pro-price-label">10€</span> <span data-i18n="perYear">/ ano</span></span>
         </button>
 
         <div class="flex items-center gap-3 mb-6">
@@ -289,7 +288,7 @@
     let isAudioSetup = false;
     let watermarkInterval = null;
     let customPresets = [];
-    let proPriceFormatted = "10€"; // valor de reserva até o Google Play devolver o preço real configurado
+    let proPriceFormatted = "10€";
 
     const i18n = {
         pt: {
@@ -326,19 +325,20 @@
             exportPathLabel: "Localização:",
             exportPathValue: "Pasta 'Downloads' do telemóvel",
             proUpgradeTitle: "Versão PRO Requerida",
+            perYear: "/ ano",
             proUpgradeText: "A exportação de ficheiros é um recurso exclusivo da versão PRO. Faz o upgrade para remover a marca de água e exportar os teus trabalhos!"
         },
         es: {
             statusWait: "Esperando Archivo",
             statusActive: "Audio en Tiempo Real Activo",
             step1Title: "1. Importar Video o Audio",
-            dropText: "Elige o arrastra o arquivo de video/audio",
+            dropText: "Elige o arrastra o archivo de video/audio",
             formatsText: "Formatos: MP4, MOV, MP3, WAV",
             previewTitle: "Vista previa",
             noMedia: "Carga un video/audio e haz clic em Play",
             infoPrefix: "• Info:",
-            infoText: "Al reproducir el video/audio, cambia os parâmetros para obter diferentes hipóteses de som.",
-            step2Title: "Parâmetros",
+            infoText: "Al reproducir el video/audio, cambia los parámetros para obtener diferentes opciones de sonido.",
+            step2Title: "Parámetros",
             saveBtn: "Guardar Ajuste",
             roomDesc: "Sala Pequeña",
             hallDesc: "Solos Amplios",
@@ -351,18 +351,19 @@
             step3Title: "3. Control Manual de Acústica",
             wetLabel: "Intensidad de Reverb (Mix Wet/Dry)",
             delayLabel: "Retardo / Eco (Delay Time)",
-            hpfLabel: "Corte de Graves Limpieza (High-Pass EQ)",
-            step4Title: "Exportação",
+            hpfLabel: "Corte de Graves (High-Pass EQ)",
+            step4Title: "Exportación",
             exportBtn: "Exportar",
             procText: "Aplicando efecto al audio...",
-            promptPreset: "Nombra tu ajuste de som (ej: Mi Reverb Favorito):",
-            exportDone: "¡Archivo exportado con sucesso!",
+            promptPreset: "Nombra tu ajuste de sonido (ej: Mi Reverb Favorito):",
+            exportDone: "¡Archivo exportado con éxito!",
             exportSuccessTitle: "Exportación Completada",
             exportFileLabel: "Archivo:",
             exportPathLabel: "Ubicación:",
             exportPathValue: "Carpeta 'Downloads' del móvil",
             proUpgradeTitle: "Versión PRO Requerida",
-            proUpgradeText: "La exportación de arquivos es una función exclusiva de la versión PRO. ¡Actualiza para eliminar la marca de agua y exportar tus trabalhos!"
+            perYear: "/ año",
+            proUpgradeText: "La exportación de archivos es una función exclusiva de la versión PRO. ¡Actualiza para eliminar la marca de agua y exportar tus trabajos!"
         },
         en: {
             statusWait: "Waiting for File",
@@ -398,43 +399,45 @@
             exportPathLabel: "Location:",
             exportPathValue: "Phone 'Downloads' folder",
             proUpgradeTitle: "PRO Version Required",
+            perYear: "/ year",
             proUpgradeText: "File export is an exclusive PRO feature. Upgrade to remove the watermark and export your work!"
         },
         fr: {
             statusWait: "En attente de fichier",
-            statusActive: "Audio en tempo real actif",
-            step1Title: "1. Importer Video ou Audio",
-            dropText: "Choisissez ou glissez o arquivo video/audio",
+            statusActive: "Audio en temps réel actif",
+            step1Title: "1. Importer Vidéo ou Audio",
+            dropText: "Choisissez ou glissez le fichier vidéo/audio",
             formatsText: "Formats: MP4, MOV, MP3, WAV",
             previewTitle: "Aperçu",
-            noMedia: "Chargez uma video/audio e cliquez sur Play",
+            noMedia: "Chargez une vidéo/audio et cliquez sur Play",
             infoPrefix: "• Info:",
-            infoText: "Pendant la lecture, modifiez les parametres pour obter differentes options sonores.",
-            step2Title: "Parametres",
-            saveBtn: "Enregistrer Reglage",
+            infoText: "Pendant la lecture, modifiez les paramètres pour obtenir différentes options sonores.",
+            step2Title: "Paramètres",
+            saveBtn: "Enregistrer Réglage",
             roomDesc: "Petite Pièce",
             hallDesc: "Grands Solos",
             delayTitle: "Guitar Delay",
-            delayDesc: "Echo Repetitif",
-            slapDesc: "Echo Vintage",
+            delayDesc: "Écho Répétitif",
+            slapDesc: "Écho Vintage",
             dryTitle: "Son Propre",
             dryDesc: "Sans Effets",
-            myPresetsTitle: "Mes Reglages Enregistres:",
-            step3Title: "3. Contrôle Manual de l'Acoustique",
+            myPresetsTitle: "Mes Réglages Enregistrés:",
+            step3Title: "3. Contrôle Manuel de l'Acoustique",
             wetLabel: "Intensité de Reverb (Mix Wet/Dry)",
-            delayLabel: "Retard / Echo (Delay Time)",
-            hpfLabel: "Coupure das Basses (EQ Coupe-Bas)",
+            delayLabel: "Retard / Écho (Delay Time)",
+            hpfLabel: "Coupure des Basses (EQ Coupe-Bas)",
             step4Title: "Exportation",
             exportBtn: "Exporter",
             procText: "Application de l'effet à l'audio...",
-            promptPreset: "Nommez votre reglage sonore (ex: Ma Reverb Preferee):",
-            exportDone: "Fichier exporte avec sucesso!",
+            promptPreset: "Nommez votre réglage sonore (ex: Ma Reverb Préférée):",
+            exportDone: "Fichier exporté avec succès!",
             exportSuccessTitle: "Exportation Terminée",
             exportFileLabel: "Fichier:",
             exportPathLabel: "Emplacement:",
             exportPathValue: "Dossier 'Downloads' du téléphone",
             proUpgradeTitle: "Version PRO Requise",
-            proUpgradeText: "L'exportation de fichiers est uma funcionalidade PRO exclusive. Passez à la version supérieure pour supprimer le filigrane et exporter vos travaux !"
+            perYear: "/ an",
+            proUpgradeText: "L'exportation de fichiers est une fonctionnalité PRO exclusive. Passez à la version supérieure pour supprimer le filigrane et exporter vos travaux !"
         }
     };
 
@@ -448,9 +451,6 @@
         }
     };
 
-    // Chamado pelo MainActivity.kt assim que o BillingClient devolve o preço
-    // real configurado na Play Console — mantém o valor sempre sincronizado
-    // mesmo que o preço mude na consola sem precisar de atualizar o código.
     window.setProPrice = function(formattedPrice) {
         if (!formattedPrice) return;
         proPriceFormatted = formattedPrice;
@@ -513,30 +513,27 @@
     }
 
     function buyProOnPlayStore() {
-        // Fluxo correto: aciona diretamente o Google Play Billing nativo via
-        // ponte JS do MainActivity.kt. NUNCA abrir a ficha da app na Play Store
-        // (https://play.google.com/...) — isso apenas mostra a página geral da
-        // app e não inicia nenhuma compra.
         if (window.AndroidInterface && typeof window.AndroidInterface.launchBillingFlow === 'function') {
             window.AndroidInterface.launchBillingFlow();
         } else {
-            // Fallback só para testes fora da app instalada (ex: browser de desktop)
             alert("A compra da versão PRO só está disponível dentro da aplicação instalada via Google Play.");
         }
     }
 
     function setLanguage(lang) {
+        if (!i18n[lang]) return;
         currentLang = lang;
         ['pt', 'es', 'en', 'fr'].forEach(l => {
             const btn = document.getElementById(`lang-${l}`);
             if (btn) {
-                btn.className = (l === lang) ?
-                    "px-2 py-0.5 rounded font-semibold text-white bg-blue-600 transition-colors" :
-                    "px-2 py-0.5 rounded font-semibold text-white/80 hover:text-white hover:bg-emerald-700 transition-colors";
+                if (l === lang) {
+                    btn.className = "px-2 py-0.5 rounded font-semibold text-white bg-blue-600 transition-colors";
+                } else {
+                    btn.className = "px-2 py-0.5 rounded font-semibold text-white/80 hover:text-white hover:bg-emerald-700 transition-colors";
+                }
             }
         });
         const dict = i18n[lang];
-        if (!dict) return;
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (dict[key]) el.textContent = dict[key];
@@ -708,124 +705,6 @@
     let recordedChunks = [];
 
     function processAndExport() {
-<<<<<<< HEAD
-    const v = document.getElementById('videoPlayer');
-    const a = document.getElementById('audioPlayer');
-    const isVideo = (v.src && !v.classList.contains('hidden'));
-    const isAudio = (a.src && !a.classList.contains('hidden'));
-    const mediaElement = isVideo ? v : (isAudio ? a : null);
-
-    if (!mediaElement || !mediaElement.src) {
-        alert(i18n[currentLang].noMedia);
-        return;
-    }
-
-    if (!isProUser) {
-        openProModal();
-        return;
-    }
-
-    const exportBtn = document.getElementById('exportBtn');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressBar = document.getElementById('progressBar');
-    const progressPercent = document.getElementById('progressPercent');
-    const progressStatus = document.getElementById('progressStatus');
-
-    exportBtn.disabled = true;
-    exportBtn.classList.add('opacity-50');
-    progressContainer.classList.remove('hidden');
-
-    // SILENCIAR O SOM NAS COLUNAS DURANTE O RENDER (evita os estalidos)
-    if (typeof audioCtx !== 'undefined' && audioCtx.destination) {
-        try {
-            wetGainNode.disconnect(audioCtx.destination);
-            dryGainNode.disconnect(audioCtx.destination);
-        } catch (e) {
-            // Ignora se já estiverem desligados
-        }
-    }
-
-    // Reset player to start
-    mediaElement.pause();
-    mediaElement.currentTime = 0;
-
-    const streamDest = audioCtx.createMediaStreamDestination();
-    wetGainNode.connect(streamDest);
-    dryGainNode.connect(streamDest);
-
-    let combinedStream;
-    if (isVideo) {
-        const videoStream = v.captureStream();
-        combinedStream = new MediaStream([
-            ...videoStream.getVideoTracks(),
-            ...streamDest.stream.getAudioTracks()
-        ]);
-    } else {
-        combinedStream = streamDest.stream;
-    }
-
-    recordedChunks = [];
-    const mimeType = isVideo ? 'video/mp4' : 'audio/webm';
-    mediaRecorder = new MediaRecorder(combinedStream, { mimeType: mimeType });
-
-    mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) recordedChunks.push(event.data);
-    };
-
-    mediaRecorder.onstop = () => {
-        // RESTAURAR O SOM PARA AS COLUNAS DO DISPOSITIVO
-        if (typeof audioCtx !== 'undefined' && audioCtx.destination) {
-            try {
-                wetGainNode.connect(audioCtx.destination);
-                dryGainNode.connect(audioCtx.destination);
-            } catch (e) {}
-        }
-
-        const blob = new Blob(recordedChunks, { type: isVideo ? 'video/mp4' : 'audio/wav' });
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64Data = reader.result;
-            const ext = isVideo ? ".mp4" : ".wav";
-            const outMime = isVideo ? "video/mp4" : "audio/wav";
-            let baseName = originalFileName.replace(/(_reverb|\.reverb)+/g, '').replace(/\.[^/.]+$/, "");
-            let exportName = `${baseName}.reverb${ext}`;
-
-            if (window.AndroidDownloadBridge && window.AndroidDownloadBridge.downloadFile) {
-                window.AndroidDownloadBridge.downloadFile(base64Data, exportName, outMime);
-            } else {
-                const url = URL.createObjectURL(blob);
-                const lnk = document.createElement('a'); lnk.href = url; lnk.download = exportName;
-                document.body.appendChild(lnk); lnk.click(); document.body.removeChild(lnk);
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }
-
-            showSuccessModal(exportName);
-            exportBtn.disabled = false;
-            exportBtn.classList.remove('opacity-50');
-            progressContainer.classList.add('hidden');
-        };
-        reader.readAsDataURL(blob);
-    };
-
-    mediaElement.play().then(() => {
-        mediaRecorder.start();
-        progressStatus.innerText = i18n[currentLang].procText;
-
-        const duration = mediaElement.duration;
-        const updateProgress = setInterval(() => {
-            const progress = (mediaElement.currentTime / duration) * 100;
-            progressBar.style.width = Math.min(progress, 100) + '%';
-            progressPercent.textContent = Math.round(Math.min(progress, 100)) + '%';
-
-            if (mediaElement.ended || mediaElement.currentTime >= duration) {
-                clearInterval(updateProgress);
-                mediaRecorder.stop();
-                mediaElement.pause();
-            }
-        }, 100);
-    });
-}
-=======
         const v = document.getElementById('videoPlayer');
         const a = document.getElementById('audioPlayer');
         const isVideo = (v.src && !v.classList.contains('hidden'));
@@ -852,7 +731,13 @@
         exportBtn.classList.add('opacity-50');
         progressContainer.classList.remove('hidden');
 
-        // Reset player to start
+        if (typeof audioCtx !== 'undefined' && audioCtx.destination) {
+            try {
+                wetGainNode.disconnect(audioCtx.destination);
+                dryGainNode.disconnect(audioCtx.destination);
+            } catch (e) {}
+        }
+
         mediaElement.pause();
         mediaElement.currentTime = 0;
 
@@ -880,6 +765,13 @@
         };
 
         mediaRecorder.onstop = () => {
+            if (typeof audioCtx !== 'undefined' && audioCtx.destination) {
+                try {
+                    wetGainNode.connect(audioCtx.destination);
+                    dryGainNode.connect(audioCtx.destination);
+                } catch (e) {}
+            }
+
             const blob = new Blob(recordedChunks, { type: isVideo ? 'video/mp4' : 'audio/wav' });
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -924,7 +816,6 @@
             }, 100);
         });
     }
->>>>>>> e8a7ff4800838b2e35568106442bc6457259c601
 
     function showSuccessModal(fileName) {
         const dict = i18n[currentLang];
