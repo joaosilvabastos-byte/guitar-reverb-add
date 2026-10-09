@@ -10,8 +10,8 @@ android {
         applicationId = "com.bastos.guitarreverbadd"
         minSdk = 24
         targetSdk = 37
-        versionCode = 16
-        versionName = "2.5"
+        versionCode = 17
+        versionName = "2.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -188,6 +188,13 @@
                     <span data-i18n="step4Title">Exportação</span>
                 </h2>
             </div>
+
+            <!-- Campo para personalizar o nome do ficheiro -->
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-slate-400 mb-1">Nome do Ficheiro</label>
+                <input type="text" id="outputFileName" value="guitar_reverb_output.wav" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500 transition">
+            </div>
+
             <button id="exportBtn" onclick="processAndExport()" class="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition cursor-pointer">
                 <i data-lucide="sparkles" class="w-5 h-5"></i>
                 <span data-i18n="exportBtn">Exportar</span>
@@ -772,14 +779,22 @@
                 } catch (e) {}
             }
 
-            const blob = new Blob(recordedChunks, { type: isVideo ? 'video/mp4' : 'audio/wav' });
+           const blob = new Blob(recordedChunks, { type: isVideo ? 'video/mp4' : 'audio/wav' });
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Data = reader.result;
                 const ext = isVideo ? ".mp4" : ".wav";
                 const outMime = isVideo ? "video/mp4" : "audio/wav";
-                let baseName = originalFileName.replace(/(_reverb|\.reverb)+/g, '').replace(/\.[^/.]+$/, "");
-                let exportName = `${baseName}.reverb${ext}`;
+
+                // Lê o nome inserido pelo utilizador no input que criámos
+                const userInputName = document.getElementById('outputFileName').value.trim();
+                const defaultBaseName = originalFileName.replace(/(_reverb|\.reverb)+/g, '').replace(/\.[^/.]+$/, "");
+                let exportName = userInputName ? userInputName : `${defaultBaseName}.reverb${ext}`;
+
+                // Garante que termina com a extensão correta (.wav ou .mp4)
+                if (!exportName.toLowerCase().endsWith(ext)) {
+                    exportName += ext;
+                }
 
                 if (window.AndroidDownloadBridge && window.AndroidDownloadBridge.downloadFile) {
                     window.AndroidDownloadBridge.downloadFile(base64Data, exportName, outMime);
